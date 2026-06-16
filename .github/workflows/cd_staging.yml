@@ -18,9 +18,31 @@ jobs:
           username: ubuntu
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-            cd bms-devops && git pull
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+            echo "Node Version:"
+            node -v
+
+            echo "NPM Version:"
+            npm -v
+
+            echo "PNPM Version:"
+            pnpm -v
+
+            echo "PM2 Version:"
+            pm2 -v
+
+            cd ~/bms-devops
+
+            git pull origin main
+
             pnpm install
+
             pnpm run build
+
             pm2 restart fe-server
             pm2 restart http-server
             pm2 restart ws-server
+
+            pm2 save
