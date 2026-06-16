@@ -12,14 +12,15 @@ jobs:
 
     steps:
       - name: SSH into server and deploy
-        run: |
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
-          chmod 600 ~/ssh_key
-          ssh -i ~/ssh_key -o StrictHostKeyChecking=no root@98.81.161.160 << 'EOF'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 98.81.161.160
+          username: root
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
             cd bms-devops/ && git pull
             pnpm install
             pnpm run build
             pm2 restart fe-server
             pm2 restart http-server
             pm2 restart ws-server
-          EOF
