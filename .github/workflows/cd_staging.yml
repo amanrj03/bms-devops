@@ -1,21 +1,25 @@
 name: Deploy to staging
+
 on:
   push:
     branches:
       - main
+
 jobs:
   redeploy_frontend:
-    name: Deploying everythign to the staging cluster
+    name: Deploying everything to the staging cluster
+    runs-on: ubuntu-latest
 
     steps:
-      - name: SSH Into server
-      - run: |
-          echo ${{ SSH_PRIVATE_KEY}} &> ~/ssh_key
-          ssh -i ~/ssh_key root@98.81.161.160
-          cd bms-devops/ && git pull
-          pnpm install
-          pnpm run build
-          pm2 restart fe-server
-          pm2 restart http-server
-          pm2 restart ws-server
-
+      - name: SSH into server and deploy
+        run: |
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/ssh_key
+          chmod 600 ~/ssh_key
+          ssh -i ~/ssh_key -o StrictHostKeyChecking=no root@98.81.161.160 << 'EOF'
+            cd bms-devops/ && git pull
+            pnpm install
+            pnpm run build
+            pm2 restart fe-server
+            pm2 restart http-server
+            pm2 restart ws-server
+          EOF
